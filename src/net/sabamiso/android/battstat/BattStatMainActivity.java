@@ -21,6 +21,7 @@ public class BattStatMainActivity extends Activity implements Runnable{
 	BatteryBroadcastReceiver receiver;
 
 	Item item_level;
+	Item item_voltage;
 	Item item_status;
 	Item item_plugged_type;
 	Item item_health;
@@ -32,20 +33,20 @@ public class BattStatMainActivity extends Activity implements Runnable{
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-		getWindow().getDecorView().setSystemUiVisibility(
-				View.SYSTEM_UI_FLAG_LOW_PROFILE);
 		
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_batt_stat_main);
 
 		ListView listview = (ListView) findViewById(R.id.listView1);
 		item_level = new Item("Battery Level", "");
+		item_voltage = new Item("Voltage", "");
 		item_status = new Item("Status", "");
 		item_plugged_type = new Item("Plugged Type", "");
 		item_health = new Item("Battery Health", "");
 
 		ArrayList<Item> list = new ArrayList<Item>();
 		list.add(item_level);
+		list.add(item_voltage);
 		list.add(item_status);
 		list.add(item_plugged_type);
 		list.add(item_health);
@@ -76,9 +77,9 @@ public class BattStatMainActivity extends Activity implements Runnable{
 	public void run() {
 		item_level.setValue(Integer.toString(receiver.getLevel()) + " %");
 		item_status.setValue(receiver.getStatus());
+		item_voltage.setValue(Integer.toString(receiver.getVoltage()) + "mV");
 		item_plugged_type.setValue(receiver.getPluggedType());
 		item_health.setValue(receiver.getHealth());
-		
 		adapter.notifyDataSetInvalidated();
 	}
 
@@ -88,6 +89,7 @@ public class BattStatMainActivity extends Activity implements Runnable{
 		String status;
 		String plugged_type = "";
 		String health = "";
+		int voltage = 0;
 
 		public BatteryBroadcastReceiver(BattStatMainActivity activity) {
 			this.activity = activity;
@@ -109,6 +111,10 @@ public class BattStatMainActivity extends Activity implements Runnable{
 			return health;
 		}
 
+		public int getVoltage() {
+			return voltage;
+		}
+		
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			int lv = intent.getIntExtra("level", 0);
@@ -116,6 +122,8 @@ public class BattStatMainActivity extends Activity implements Runnable{
 
 			this.level = (int) (lv / (float) s * 100.0);
 
+			this.voltage = intent.getIntExtra("voltage", 0);
+			
             switch (intent.getIntExtra("status", 0)) {
             case BatteryManager.BATTERY_STATUS_UNKNOWN:
                 status = "Unknown";
@@ -141,9 +149,6 @@ public class BattStatMainActivity extends Activity implements Runnable{
 				break;
 			case BatteryManager.BATTERY_PLUGGED_USB:
 				plugged_type = "USB";
-				break;
-			case BatteryManager.BATTERY_PLUGGED_WIRELESS:
-				plugged_type = "WIRELESS";
 				break;
 			default:
 				plugged_type = "None";
