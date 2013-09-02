@@ -150,6 +150,9 @@ public class BattStatMainActivity extends Activity implements Runnable{
 			case BatteryManager.BATTERY_PLUGGED_USB:
 				plugged_type = "USB";
 				break;
+			case 4: // BatteryManager.BATTERY_PLUGGED_WIRELESS 
+				plugged_type = "Wireless";
+				break;
 			default:
 				plugged_type = "None";
 				break;
