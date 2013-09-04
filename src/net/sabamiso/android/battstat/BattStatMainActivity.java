@@ -25,6 +25,7 @@ public class BattStatMainActivity extends Activity implements Runnable{
 	Item item_status;
 	Item item_plugged_type;
 	Item item_health;
+	Item item_temperature;
 	
 	ItemAdapter adapter;
 
@@ -43,6 +44,7 @@ public class BattStatMainActivity extends Activity implements Runnable{
 		item_status = new Item("Status", "");
 		item_plugged_type = new Item("Plugged Type", "");
 		item_health = new Item("Battery Health", "");
+		item_temperature = new Item("Temperature", "");
 
 		ArrayList<Item> list = new ArrayList<Item>();
 		list.add(item_level);
@@ -50,6 +52,7 @@ public class BattStatMainActivity extends Activity implements Runnable{
 		list.add(item_status);
 		list.add(item_plugged_type);
 		list.add(item_health);
+		list.add(item_temperature);
 
 		adapter = new ItemAdapter(this, list);
 		listview.setAdapter(adapter);
@@ -80,6 +83,7 @@ public class BattStatMainActivity extends Activity implements Runnable{
 		item_voltage.setValue(Integer.toString(receiver.getVoltage()) + "mV");
 		item_plugged_type.setValue(receiver.getPluggedType());
 		item_health.setValue(receiver.getHealth());
+		item_temperature.setValue("" + receiver.getTemperature() + "Åé");
 		adapter.notifyDataSetInvalidated();
 	}
 
@@ -90,7 +94,8 @@ public class BattStatMainActivity extends Activity implements Runnable{
 		String plugged_type = "";
 		String health = "";
 		int voltage = 0;
-
+		float temperature;
+		
 		public BatteryBroadcastReceiver(BattStatMainActivity activity) {
 			this.activity = activity;
 		}
@@ -115,14 +120,18 @@ public class BattStatMainActivity extends Activity implements Runnable{
 			return voltage;
 		}
 		
+		public float getTemperature() {
+			return temperature;
+		}
+		
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			int lv = intent.getIntExtra("level", 0);
 			int s = intent.getIntExtra("scale", 0);
 
 			this.level = (int) (lv / (float) s * 100.0);
-
 			this.voltage = intent.getIntExtra("voltage", 0);
+			this.temperature = intent.getIntExtra("temperature", 0) / 10.0f;
 			
             switch (intent.getIntExtra("status", 0)) {
             case BatteryManager.BATTERY_STATUS_UNKNOWN:
